@@ -12,6 +12,16 @@ namespace TestSystem.Infrastructure.Mappings
             CreateMap<CaoUsuarioCreateDTO, CaoUsuario>().ReverseMap();
             CreateMap<CaoUsuarioUpdateDTO, CaoUsuario>().ReverseMap();
             CreateMap<CaoUsuarioDeleteDTO, CaoUsuario>().ReverseMap();
+
+            CreateMap<CaoFatura, CaoFaturaDTO>().ReverseMap();
+            CreateMap<CaoFaturaCreateDTO, CaoFatura>().ReverseMap();
+            CreateMap<CaoFaturaUpdateDTO, CaoFatura>().ReverseMap();
+            CreateMap<CaoFaturaDeleteDTO, CaoFatura>().ReverseMap();
+
+            CreateMap<CaoSalario, CaoSalarioDTO>().ReverseMap();
+            CreateMap<CaoSalarioCreateDTO, CaoSalario>().ReverseMap();
+            CreateMap<CaoSalarioUpdateDTO, CaoSalario>().ReverseMap();
+            CreateMap<CaoSalarioDeleteDTO, CaoSalario>().ReverseMap();
         }
     }
 }

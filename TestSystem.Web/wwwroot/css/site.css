@@ -16,3 +16,10 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+.list-group-scrolleable {
+    max-height: 420px;
+    margin-bottom: 10px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}

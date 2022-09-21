@@ -1,0 +1,54 @@
+﻿@using System.Globalization
+@using TestSystem.Core.DTOs
+@model List<ProfitDTO>
+
+@{
+    Layout = null;
+}
+
+<div class="row">
+    <div class="col-12">
+        @foreach (var consultor in Model)
+        {
+            <table class="table table-sm table-striped">
+                <thead>
+                    <tr class="table-secondary" colspan="5">
+                        <th>@consultor.Name</th>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                    </tr>
+                    <tr>
+                        <th style="text-align:center;">Periodo</th>
+                        <th style="text-align:center;">Receita Liquida</th>
+                        <th style="text-align:center;">Custo Fixo</th>
+                        <th style="text-align:center;">Comissao</th>
+                        <th style="text-align:center;">Lucro</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var period in consultor.Periods)
+                    {
+                        <tr>
+                            <td style="text-align:left;width:30%;">@period.Description</td>
+                            <td style="text-align:right;width:17.5%;">@period.Profit.ToString("C2", CultureInfo.GetCultureInfo("pt-BR"))</td>
+                            <td style="text-align:right;width:17.5%;">@consultor.FixedCost.ToString("C2", CultureInfo.GetCultureInfo("pt-BR"))</td>
+                            <td style="text-align:right;width:17.5%;">@period.Commission.ToString("C2", CultureInfo.GetCultureInfo("pt-BR"))</td>
+                            <td style="text-align:right;width:17.5%;">@period.Loot.ToString("C2", CultureInfo.GetCultureInfo("pt-BR"))</td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot>
+                    <tr class="table-secondary">
+                        <td style="text-align:left;width:30%;">Saldo</td>
+                        <td style="text-align:right;width:17.5%;">@consultor.Periods.Sum(x => x.Profit).ToString("C2", CultureInfo.GetCultureInfo("pt-BR"))</td>
+                        <td style="text-align:right;width:17.5%;">@((consultor.FixedCost * consultor.Periods.Count).ToString("C2", CultureInfo.GetCultureInfo("pt-BR")))</td>
+                        <td style="text-align:right;width:17.5%;">@consultor.Periods.Sum(x => x.Commission).ToString("C2", CultureInfo.GetCultureInfo("pt-BR"))</td>
+                        <td style="text-align:right;width:17.5%;">@consultor.Periods.Sum(x => x.Loot).ToString("C2", CultureInfo.GetCultureInfo("pt-BR"))</td>
+                    </tr>
+                </tfoot>
+            </table>
+        }
+    </div>
+</div>

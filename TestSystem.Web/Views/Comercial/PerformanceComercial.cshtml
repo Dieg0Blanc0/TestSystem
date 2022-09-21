@@ -1,0 +1,370 @@
+﻿@using TestSystem.Core.DTOs
+@model List<CaoUsuarioDTO>
+@{
+    ViewData["Title"] = "Comercial";
+}
+
+<ul class="nav nav-tabs m-1" id="comercialTab" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="consultor-tab" data-bs-toggle="tab" data-bs-target="#consultor" type="button" role="tab" aria-controls="consultor" aria-selected="true">Por Consultor</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="cliente-tab" data-bs-toggle="tab" data-bs-target="#cliente" type="button" role="tab" aria-controls="cliente" aria-selected="false">Por Cliente</button>
+    </li>
+</ul>
+<div class="tab-content m-1" id="comercialTabContent">
+    <div class="tab-pane fade show active" id="consultor" role="tabpanel" aria-labelledby="consultor-tab">
+        <div class="list-group list-group-scrolleable">
+            @if(Model != null){
+                foreach (var consultor in Model)
+                {
+                    <label class="list-group-item">
+                        <input class="form-check-input me-1" type="checkbox" value="@consultor.CoUsuario">
+                        @consultor.NoUsuario
+                    </label>
+                }
+            }
+        </div>
+    </div>
+    
+    <div class="tab-pane fade" id="cliente" role="tabpanel" aria-labelledby="cliente-tab">...</div>
+    
+    <div class="row p-3 m-1 bg-light">
+        <div class="col-lg-6 col-sm-12">
+            <label>Periodo</label>
+            <input type="month" value="" id="fromDate" />
+            <label>a</label>
+            <input type="month" value="" id="toDate"/>
+        </div>
+
+        <div id="btnContainer" class="col-lg-6 col-sm-12 d-flex justify-content-lg-end justify-content-sm-start mt-lg-0 mt-sm-3">
+            <button id="btnRelatorio" class="btn btn-sm btn-primary me-2">Relatorio</button>
+            <button id="btnGrafico" class="btn btn-sm btn-primary me-2">Grafico</button>
+            <button id="btnPizza" class="btn btn-sm btn-primary me-0">Pizza</button>
+        </div>
+    </div>
+
+    <div class="row mt-3">
+        <div id="contentContainer" class="col-12">
+
+        </div>
+    </div>
+
+    <div class="modal fade" id="chartModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-12">
+                        <canvas id="barChart" style="max-height:500px"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+</div>
+
+@section scripts {
+@{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+<script>
+    const canvasBarChart = document.getElementById('barChart')
+    let chartModal = new bootstrap.Modal(document.getElementById('chartModal'))
+    let chart
+
+    const Toast = swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 6000,
+        width: 600,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+            toast.addEventListener('mouseenter', Swal.stopTimer)
+            toast.addEventListener('mouseleave', Swal.resumeTimer)
+        }
+    })
+
+    const renderErrorList = (aErrorsList) =>{
+        let ul = document.createElement("ul")
+
+        aErrorsList.forEach(error => {
+            let li = document.createElement("li")
+            let liText = document.createTextNode(error)
+            li.appendChild(liText)
+
+            ul.appendChild(li)
+        })
+
+        return ul
+    }
+
+    const colorCode = () => {
+        let makingColorCode = '0123456789ABCDEF';
+        let finalCode = '#';
+          for (var counter = 0; counter < 6; counter++) {
+             finalCode =finalCode+ makingColorCode[Math.floor(Math.random() * 16)];
+          }
+      return finalCode;
+    }
+
+    const formatter = new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL',
+        minimumFractionDigits: 0
+    })
+
+    const btnContainer = document.getElementById('btnContainer')
+    btnContainer.addEventListener('click', e => {
+        e.preventDefault()
+        
+        const contentContainer = document.getElementById('contentContainer')
+        const sFromDate = document.getElementById('fromDate')
+        const sToDate = document.getElementById('toDate')
+        const listGroupElements = Array.apply(null, document.querySelectorAll('input[type=checkbox]:checked'))
+        
+        let isValid = true
+        let consultors = listGroupElements.map(item => item.value)
+        let dFromDate = moment(new Date(sFromDate.value))
+        let dToDate = moment(new Date(sToDate.value))
+        let errorMessages = []
+
+        if(consultors.length == 0){
+            isValid = false
+            errorMessages.push('Debe seleccionar los consultores para la busqueda')
+        }
+
+        if(!moment(dFromDate).isValid() || !moment(dToDate).isValid()){
+            isValid = false
+            errorMessages.push('Debe seleccionar una fecha valida para la busqueda')
+        }
+
+        if (moment(dFromDate).isAfter(dToDate)) {
+            isValid = false
+            errorMessages.push('La fecha final no puede ser menor a la fecha inicial')
+        }
+
+        if (moment(dToDate).isAfter(moment(new Date()))) {
+            isValid = false
+            errorMessages.push('La fecha final no puede ser mayor a la fecha actual')
+        }
+
+        if(isValid){
+            let dataToSend = { }
+            dataToSend["Consultors"] = consultors
+            dataToSend["FromDate"] = sFromDate.value
+            dataToSend["ToDate"] = sToDate.value
+
+            if(e.target.id == "btnRelatorio"){
+                $.ajax({
+                url: "/Comercial/GetProfit",
+                type: 'POST',
+                data: {viewModel: dataToSend},
+                    success: function (data) {
+                        contentContainer.innerHTML = data
+                    },
+                    error: function (data) {
+                        debugger
+                        for (var key in data.responseJSON) {
+                            console.log(key);
+                            console.log(data.responseJSON[key]);
+                        }
+
+                        Toast.fire({
+                            icon: 'error',
+                            title: 'An error occurred while procesing the data'
+                        })
+                    }
+                });
+            }else if(e.target.id == "btnGrafico"){
+                $.ajax({
+                url: "/Comercial/GetProfitJson",
+                type: 'POST',
+                data: {viewModel: dataToSend},
+                    success: function (data) {
+                        console.log(data)
+                        if (chart != undefined) {
+                            chart.destroy()
+                        }
+                        chartModal.show()
+                        let labels = []
+                        let count = 0
+
+                        data.forEach(c => {
+                            if(count == 0){
+                                count = c.periods.lenght
+                                c.periods.forEach(p => {
+                                    labels.push(p.description)
+                                })
+                            }else if(count < c.periods.lenght){
+                                labels = []
+                                count = c.periods.lenght
+                                c.periods.forEach(p => {
+                                    labels.push(p.description)
+                                })
+                            }
+                        })
+
+                        let summaryCost = data.reduce((a, b) => { return { 'fixedCost': a.fixedCost + b.fixedCost } })
+                        let avgCost = summaryCost.fixedCost / data.length
+
+                        let avgData =[]
+
+                        for(let i = 0; i < labels.length; i ++){
+                            avgData.push(avgCost)
+                        }
+
+                        avgDataset = {
+                            'label': 'Costo promedio',
+                            'data': avgData,
+                            'backgroundColor': 'rgb(55,150,255)',
+                            'borderColor': 'rgb(55,150,255)',
+                            'type': 'line',
+                            'order' : 0,
+
+                        }
+
+                        let datasets = data.map(consultor => {
+                            return {
+                                'label': consultor.name,
+                                'data': consultor.periods.map(period => period.profit),
+                                'backgroundColor' : colorCode(),
+                                'order' : 1
+                            } 
+                        })
+
+                        datasets.unshift(avgDataset)
+
+                        const dataChart = {
+                            labels: labels,
+                            datasets: datasets
+                        };
+
+                        const config = {
+                            type: 'bar',
+                            data: dataChart,
+                            options: {
+                                responsive: true,
+                                plugins: {
+                                    legend: {
+                                        position: 'top',
+                                    },
+                                    title: {
+                                        display: true,
+                                        text: 'Performance Comercial'
+                                    }
+                                }
+                            },
+                        };
+
+                        chart = new Chart(canvasBarChart, config)
+                    },
+                    error: function (data) {
+                        debugger
+                        for (var key in data.responseJSON) {
+                            console.log(key);
+                            console.log(data.responseJSON[key]);
+                        }
+
+                        Toast.fire({
+                            icon: 'error',
+                            title: 'An error occurred while procesing the data'
+                        })
+                    }
+                });
+                } else if (e.target.id == "btnPizza"){
+                    $.ajax({
+                    url: "/Comercial/GetProfitJson",
+                    type: 'POST',
+                    data: {viewModel: dataToSend},
+                    success: function (data) {
+                        if (chart != undefined) {
+                            chart.destroy()
+                        }
+
+                        chartModal.show()
+                        const COLORS = [
+                          '#4dc9f6',
+                          '#f67019',
+                          '#f53794',
+                          '#537bc4',
+                          '#acc236',
+                          '#166a8f',
+                          '#00a950',
+                          '#58595b',
+                          '#8549ba'
+                        ];
+
+                        let labels = data.map(consultor => consultor.name)
+                        let totalG  = data.reduce((a, b) => { return { 'total': a.total + b.total } })
+                        let dataPie = data.map(consultor => (consultor.total / totalG.total) * 100)
+
+                        const dataPizza = {
+                            labels: labels,
+                            datasets: [
+                            {
+                                label: 'Dataset 1',
+                                data: dataPie,
+                                backgroundColor: COLORS,
+                            }]
+                        };
+
+                        const config = {
+                            type: 'pie',
+                            data: dataPizza,
+                            options: {
+                                responsive: true,
+                                plugins: {
+                                    legend: {
+                                        position: 'top',
+                                    },
+                                    title: {
+                                        display: true,
+                                        text: 'Porcentaje de participacion'
+                                    }
+                                }
+                            },
+                        };
+
+                        chart = new Chart(canvasBarChart, config)
+                    },
+                    error: function (data) {
+                        debugger
+                        for (var key in data.responseJSON) {
+                            console.log(key);
+                            console.log(data.responseJSON[key]);
+                        }
+
+                        Toast.fire({
+                            icon: 'error',
+                            title: 'An error occurred while procesing the data'
+                        })
+                    }
+                });
+                }
+            
+        }else{
+            let errorMessage = renderErrorList(errorMessages)
+            
+            debugger
+            Toast.fire({
+                icon: 'error',
+                html: errorMessage
+            })
+
+        }
+
+        e.target.blur()
+    })
+</script>
+}
+

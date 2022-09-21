@@ -8,7 +8,7 @@ using TestSystem.Infrastructure.Persistence.Repositories.Base;
 
 namespace TestSystem.Infrastructure.Repositories
 {
-    public class CaoUsuarioRepository : BaseRepository<CaoUsuario, TestSystemDbContext >, ICaoUsuarioRepository<TestSystemDbContext>
+    public class CaoUsuarioRepository : BaseRepository<CaoUsuario, TestSystemDbContext>, ICaoUsuarioRepository<TestSystemDbContext>
     {
         private readonly TestSystemDbContext _context;
 
@@ -19,7 +19,7 @@ namespace TestSystem.Infrastructure.Repositories
 
         public async Task AddCaoUsuarioAsync(CaoUsuario entity, CancellationToken cancellationToken = default) =>
             await AddAsync(entity, cancellationToken);
-        
+
         public void DeleteCaoUsuario(CaoUsuario entity) => DeleteCaoUsuario(entity);
 
         public async Task<IEnumerable<CaoUsuario>> FilterCaoUsuariosAsync(Expression<Func<CaoUsuario, bool>> predicate, CancellationToken cancellationToken = default) =>
@@ -27,10 +27,10 @@ namespace TestSystem.Infrastructure.Repositories
 
         public async Task<CaoUsuario> FilterSingleCaoUsuario(Expression<Func<CaoUsuario, bool>> predicate, CancellationToken cancellationToken = default) =>
             await FilterSingleAsync(predicate, cancellationToken);
-        
+
         public async Task<IEnumerable<CaoUsuario>> GetAllCaoUsuarioAsync(CancellationToken cancellationToken = default) =>
             await GetAllAsync(cancellationToken);
-       
+
         public async Task<IEnumerable<CaoUsuario>> GetAllCaoUsuarioWithPermission(CancellationToken cancellationToken = default)
         {
             var result = (from caoUsuario in _context.CaoUsuarios
@@ -38,7 +38,7 @@ namespace TestSystem.Infrastructure.Repositories
                           where permision.CoSistema == 1 && permision.InAtivo == "S" && (permision.CoTipoUsuario == 0 || permision.CoTipoUsuario == 1 || permision.CoTipoUsuario == 2)
                           select caoUsuario);
 
-            return await result.ToListAsync();
+            return await result.ToListAsync(cancellationToken);
         }
 
         public async Task<CaoUsuario> GetCaoUsuarioByIdAsync(long id, CancellationToken cancellationToken = default) =>

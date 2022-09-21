@@ -1,33 +1,8 @@
-﻿@using TestSystem.Core.DTOs
-@model List<CaoUsuarioDTO>;
-
-@{
+﻿@{
     ViewData["Title"] = "Home Page";
 }
 
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
-
-<div>
-    <table>
-        <thead>
-            <tr>
-                <th>Nombre</th>
-                <th>Correo</th>
-                <th>Telefono</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model)
-            {
-                <tr>    
-                    <td>@item.NoUsuario</td>
-                    <td>@item.NoEmail</td>
-                    <td>@item.NuTelefone</td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    <h1 class="display-4">Prototipo para la Evaluacion de Candidatos</h1>
+    <p>La evaluacion consiste en el desarrollo de la funcionalidad "<span class="text-danger">Performance Comercial</span>" (Comercial -> Performance Comercial).</p>
 </div>

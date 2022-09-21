@@ -10,6 +10,7 @@ using TestSystem.Infrastructure.Persistence.Base;
 using TestSystem.Core.Interfaces.Repositories;
 using TestSystem.Core.Interfaces.Services;
 using TestSystem.Infrastructure.Persistence.Service;
+using TestSystem.Infrastructure.Persistence.Repositories;
 
 namespace TestSystem.Infrastructure
 {
@@ -27,8 +28,12 @@ namespace TestSystem.Infrastructure
             services.AddScoped<IUnitOfWork<TestSystemDbContext>, UnitOfWork<TestSystemDbContext>>();
 
             services.AddTransient<ICaoUsuarioRepository<TestSystemDbContext>, CaoUsuarioRepository>();
+            services.AddTransient<ICaoFaturaRepository<TestSystemDbContext>, CaoFaturaRepository>();
+            services.AddTransient<ICaoSalarioRepository<TestSystemDbContext>, CaoSalarioRepository>();
 
             services.AddTransient<ICaoUsuarioService, CaoUsuarioService>();
+            services.AddTransient<ICaoFaturaService, CaoFaturaService>();
+            services.AddTransient<ICaoSalarioService, CaoSalarioService>();
 
 
             return services;

@@ -17,12 +17,10 @@ namespace TestSystem.Infrastructure.Persistence.Service
 {
     public class CaoUsuarioService : CRUDService<CaoUsuarioDTO, CaoUsuarioCreateDTO, CaoUsuarioUpdateDTO, CaoUsuarioDeleteDTO, CaoUsuario, ICaoUsuarioRepository<TestSystemDbContext>, TestSystemDbContext>, ICaoUsuarioService
     {
-        private readonly IMapper _mapper;
         private readonly ICaoUsuarioRepository<TestSystemDbContext> _caoUsuarioRepository;
 
         public CaoUsuarioService(IMapper mapper, IUnitOfWork<TestSystemDbContext> unitOfWork, ICaoUsuarioRepository<TestSystemDbContext> caoUsuarioRepository) : base(caoUsuarioRepository, unitOfWork, mapper)
         {
-            _mapper = mapper;
             _caoUsuarioRepository = caoUsuarioRepository;
         }
 

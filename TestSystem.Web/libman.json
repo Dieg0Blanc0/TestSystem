@@ -1,0 +1,21 @@
+{
+  "version": "1.0",
+  "defaultProvider": "cdnjs",
+  "libraries": [
+    {
+      "library": "moment.js@2.29.4",
+      "destination": "wwwroot/lib/moment.js/"
+    },
+    {
+      "provider": "cdnjs",
+      "library": "limonte-sweetalert2@11.4.33",
+      "destination": "wwwroot/lib/limonte-sweetalert2/"
+    }
+  ,
+{
+  "provider": "cdnjs",
+  "library": "Chart.js@3.9.1",
+  "destination": "wwwroot/lib/Chart.js/"
+}
+]
+}
